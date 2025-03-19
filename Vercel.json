@@ -1,14 +1,11 @@
 {
-  "version": 2,
-  "functions": {
-    "api/clientes.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/trial_create/(.*)/(.*)",
-      "dest": "/api/clientes.js"
-    }
-  ]
+        "version": 2,
+        "functions": {
+                "api/updateClient.js": {
+                        "runtime": "nodejs18.x"
+                },
+                "api/clientes.js": {
+                        "runtime": "nodejs18.x"
+                }
+        }
 }
