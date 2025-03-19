@@ -13,7 +13,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 secret: secretKey,
                 page: 1,
-                limit: 10
+                limit: 500
             })
         });
 
