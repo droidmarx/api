@@ -4,5 +4,11 @@
     "api/clientes.js": {
       "runtime": "nodejs18.x"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/api/trial_create/(.*)/(.*)",
+      "dest": "/api/clientes.js"
+    }
+  ]
 }
