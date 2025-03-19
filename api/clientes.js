@@ -3,7 +3,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Método não permitido" });
     }
 
-    const apiUrl = "https://api.painelcliente.com/get_clients_all/PANELCLIENT_AD73H-4XRDW-5TW60-1D0ZG";
+    const apiUrl = "https://api.painelcliente.com/update_client/PANELCLIENT_AD73H-4XRDW-5TW60-1D0ZG";
     const secretKey = "4e22fff5f896bb07f2e01e47e5061b80";
 
     try {
