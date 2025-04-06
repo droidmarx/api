@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Lista de Clientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #clientes {
+            margin-top: 20px;
+        }
+
+        .cliente {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .cliente h3 {
+            margin: 0;
+        }
+
+        .cliente p {
+            margin: 5px 0;
+        }
+
+        #loading {
+            text-align: center;
+            display: none;
+        }
+
+        .btn-editar {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .btn-editar:hover {
+            background-color: #0056b3;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            margin: 10% auto;
+            text-align: center;
+        }
+
+        .close {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn-salvar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .btn-salvar:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Todos os Clientes</h1>
+    <div id="loading">Carregando clientes...</div>
+    <div id="clientes"></div>
+
+    <!-- Modal para edição -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h3>Editar Cliente</h3>
+            <form id="formEditar">
+                <div class="form-group">
+                    <label>Nome de Usuário:</label>
+                    <input type="text" id="editUsername">
+                </div>
+                <div class="form-group">
+                    <label>Senha:</label>
+                    <input type="password" id="editPassword">
+                </div>
+                <div class="form-group">
+                    <label>ID Bouquet:</label>
+                    <input type="text" id="editIdbouquet">
+                </div>
+                <div class="form-group">
+                    <label>Notas:</label>
+                    <textarea id="editNotes"></textarea>
+                </div>
+                <input type="hidden" id="editSecret">
+                <button type="button" class="btn-salvar" onclick="salvarEdicao()">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let clienteEditando = null;
+
+        async function fetchClientes() {
+            const loadingElement = document.getElementById("loading");
+            const clientesElement = document.getElementById("clientes");
+
+            loadingElement.style.display = "block";
+            clientesElement.innerHTML = "";
+
+            try {
+                const response = await fetch("https://api-three-sigma-14.vercel.app/api/clientes", {
+                    method: "POST"
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.result) {
+                        const clientes = data.data;
+                        if (clientes.length > 0) {
+                            clientes.forEach(cliente => {
+                                const clienteDiv = document.createElement("div");
+                                clienteDiv.classList.add("cliente");
+clienteDiv.innerHTML = `
+<h3><i class="fas fa-user"></i> ${cliente.username}</h3>
+<p><i class="fas fa-id-badge"></i> ID: ${cliente.id}</p>
+<p><i class="fas fa-user-tag"></i> Member ID: ${cliente.member_id}</p>
+<p><i class="fas fa-key"></i> Senha: ${cliente.password}</p>
+<p><i class="fas fa-calendar-alt"></i> Vencimento: ${new Date(cliente.exp_date * 1000).toLocaleDateString()}</p>
+<p><i class="fas fa-tv"></i> Telas: ${cliente.max_connections}</p>
+<p><i class="fas fa-calendar-plus"></i> Criado em: ${new Date(cliente.created_at * 1000).toLocaleDateString()}</p>
+<p><i class="fas fa-sticky-note"></i> Obs: <br>${cliente.reseller_notes}</p>
+<button class="btn-editar" onclick='editarCliente(${JSON.stringify(cliente)})'>
+  
+        <i class="fas fa-edit"></i> Editar
+    </button>
+`;
+
+                                clientesElement.appendChild(clienteDiv);
+                            });
+                        } else {
+                            clientesElement.innerHTML = "Nenhum cliente encontrado.";
+                        }
+                    } else {
+                        clientesElement.innerHTML = "Erro ao carregar clientes.";
+                    }
+                } else {
+                    throw new Error("Erro ao carregar os clientes");
+                }
+            } catch (error) {
+                console.error(error);
+                clientesElement.innerHTML = "Erro ao buscar os dados.";
+            } finally {
+                loadingElement.style.display = "none";
+            }
+        }
+
+        function editarCliente(cliente) {
+            clienteEditando = cliente;
+
+            document.getElementById("editSecret").value = cliente.secret || ""; 
+            document.getElementById("editUsername").value = cliente.username;
+            document.getElementById("editPassword").value = cliente.password || "";
+            document.getElementById("editIdbouquet").value = cliente.idbouquet ? JSON.stringify(cliente.idbouquet) : "";
+            document.getElementById("editNotes").value = cliente.reseller_notes || "";
+
+            document.getElementById("modalEditar").style.display = "block";
+        }
+
+        function fecharModal() {
+            document.getElementById("modalEditar").style.display = "none";
+        }
+
+        async function salvarEdicao() {
+            if (!clienteEditando) return;
+
+            const secret = document.getElementById("editSecret").value;
+            const username = document.getElementById("editUsername").value;
+            const password = document.getElementById("editPassword").value;
+            const idbouquet = document.getElementById("editIdbouquet").value ? JSON.parse(document.getElementById("editIdbouquet").value) : null;
+            const notes = document.getElementById("editNotes").value;
+
+            const data = { secret, username, password, idbouquet, notes };
+
+            try {
+                const response = await fetch("https://api-three-sigma-14.vercel.app/api/clientes", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Cliente atualizado com sucesso!");
+                    fecharModal();
+                    fetchClientes();
+                } else {
+                    alert("Erro ao atualizar cliente: " + result.error);
+                }
+            } catch (error) {
+                alert("Erro ao conectar com a API de atualização.");
+                console.error(error);
+            }
+        }
+
+        window.onload = fetchClientes;
+    </script>
+</body>
+</html>
