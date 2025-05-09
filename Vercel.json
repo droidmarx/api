@@ -1,11 +1,8 @@
 {
-        "version": 2,
-        "functions": {
-                "api/updateClient.js": {
-                        "runtime": "nodejs18.x"
-                },
-                "api/clientes.js": {
-                        "runtime": "nodejs18.x"
-                }
-        }
+  "version": 2,
+  "functions": {
+    "api/updateClient.js": { "runtime": "nodejs18.x" },
+    "api/clientes.js": { "runtime": "nodejs18.x" },
+    "api/renewClient.js": { "runtime": "nodejs18.x" }
+  }
 }
