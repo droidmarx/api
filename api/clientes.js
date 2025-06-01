@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const apiUrl = "https://api.painelcliente.com/get_clients_all/PANELCLIENT_AD73H-4XRDW-5TW60-1D0ZG";
-  const secretKey = "4e22fff5f896bb07f2e01e47e5061b80";
+  const secretKey = "d0d9eff4f629d8c06d5ba9bc864669ff";
 
   // Habilitar CORS
   res.setHeader("Access-Control-Allow-Origin", "*"); // Libera todas as origens
